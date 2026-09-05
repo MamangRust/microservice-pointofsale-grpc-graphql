@@ -1,0 +1,47 @@
+package repository
+
+import (
+	"context"
+
+	db "github.com/MamangRust/microservice-point-of-sale-auth/database/schema"
+	"github.com/MamangRust/microservice-point-of-sale-shared/domain/requests"
+	"github.com/jackc/pgx/v5"
+)
+
+type UserRepository interface {
+	FindByEmail(ctx context.Context, email string) (*db.User, error)
+	FindById(ctx context.Context, id int) (*db.User, error)
+	FindByEmailAndVerify(ctx context.Context, email string) (*db.User, error)
+	CreateUser(ctx context.Context, request *requests.RegisterRequest) (*db.User, error)
+	CreateUserInTx(ctx context.Context, tx pgx.Tx, request *requests.RegisterRequest) (*db.User, error)
+	UpdateUserIsVerified(ctx context.Context, user_id int, is_verified bool) (*db.User, error)
+	UpdateUserPassword(ctx context.Context, user_id int, password string) (*db.User, error)
+	FindByVerificationCode(ctx context.Context, verification_code string) (*db.User, error)
+}
+
+type ResetTokenRepository interface {
+	FindByToken(ctx context.Context, token string) (*db.ResetToken, error)
+	CreateResetToken(ctx context.Context, req *requests.CreateResetTokenRequest) (*db.ResetToken, error)
+	CreateResetTokenInTx(ctx context.Context, tx pgx.Tx, req *requests.CreateResetTokenRequest) (*db.ResetToken, error)
+	DeleteResetToken(ctx context.Context, user_id int) error
+}
+
+type RefreshTokenRepository interface {
+	FindByToken(ctx context.Context, token string) (*db.RefreshToken, error)
+	FindByUserId(ctx context.Context, user_id int) (*db.RefreshToken, error)
+	CreateRefreshToken(ctx context.Context, req *requests.CreateRefreshToken) (*db.RefreshToken, error)
+	UpdateRefreshToken(ctx context.Context, req *requests.UpdateRefreshToken) (*db.RefreshToken, error)
+	DeleteRefreshToken(ctx context.Context, token string) error
+	DeleteRefreshTokenByUserId(ctx context.Context, user_id int) error
+}
+
+type UserRoleRepository interface {
+	AssignRoleToUser(ctx context.Context, req *requests.CreateUserRoleRequest) (*db.UserRole, error)
+	AssignRoleToUserInTx(ctx context.Context, tx pgx.Tx, req *requests.CreateUserRoleRequest) (*db.UserRole, error)
+	RemoveRoleFromUser(ctx context.Context, req *requests.RemoveUserRoleRequest) error
+}
+
+type RoleRepository interface {
+	FindById(ctx context.Context, role_id int) (*db.Role, error)
+	FindByName(ctx context.Context, name string) (*db.Role, error)
+}
